@@ -24,6 +24,8 @@ demonstrate not only state-of-the-art performance (88.7% $\mu$AP / 83.9% RP90
 for matcher, 72.6% $\mu$AP / 68.4% RP90 for descriptor on DISC21 dataset) 
 but also better interpretability over existing methods.
 
+![CopyNCE](assets/poster.png)
+
 ## Key files
 
 ```
@@ -36,7 +38,7 @@ core/data/augmentation/mask_mapper.py           - implementation of PixTrace, in
 core/data/augmentation                          - implementation of various augmentations 
 
 # CopyNCE-related
-core/loss/copynce_loss.py                        - implementation of CopyNCE loss
+core/loss/copynce_loss.py                       - implementation of CopyNCE loss
 
 # eval-related entry
 scripts/eval
@@ -157,7 +159,7 @@ python scripts/run/build_knn.py \
   --output-path weights/dino_vits_isc_knn.pth \
   --k 128
 
-# (Optional) generate k-NN matrix between dev set I and reference set for fine-tuning
+# (optional) generate k-NN matrix between dev set I and reference set for fine-tuning
 # extract dino features on ISC dev set I
 bash scripts/run/extract_dino_features.sh isc_query_val dev/vits_lin.yaml dino_vits_isc_val.pth
 
@@ -243,10 +245,10 @@ eval:
 **Under vanilla settings**
 ```bash
 # pwd = /path/to/project/root
-# To evaluate the descriptor under ViT-S and 224 $\times$ 224 settings on dev set
+# evaluate the descriptor under ViT-S and 224 $\times$ 224 settings on dev set
 bash scripts/eval/eval_des.sh weights/descriptor_vits_224.pth.tar dev/vits_lin.yaml
 
-# To evaluate the descriptor under ViT-B and 224 $\times$ 224 settings on dev set
+# evaluate the descriptor under ViT-B and 224 $\times$ 224 settings on dev set
 bash scripts/eval/eval_des.sh /path/to/model/weights dev/vitb_lin.yaml
 ```
 
@@ -278,20 +280,20 @@ python -m core.run.eval.measure_cls \
 **Under vanilla settings**
 ```bash
 # pwd = /path/to/project/root
-# To evaluate the matcher under ViT-S and 224 $\times$ 224 settings on dev set
+# evaluate the matcher under ViT-S and 224 $\times$ 224 settings on dev set
 bash scripts/eval/eval_cls.sh weights/matcher_vits_224.pth.tar dev/isc_copynce-cand.yaml
 
-# To evaluate the matcher under ViT-S and 336 $\times$ 336 settings on dev set
+# evaluate the matcher under ViT-S and 336 $\times$ 336 settings on dev set
 bash scripts/eval/eval_cls.sh /path/to/model/weights dev/isc_copynce-cand_336.yaml
 ```
 
 **Under local crops ensembling settings** 
 ```bash
 # pwd = /path/to/project/root
-# To evaluate the matcher under ViT-S, 224 $\times$ 224 and LCE settings on dev set
+# evaluate the matcher under ViT-S, 224 $\times$ 224 and LCE settings on dev set
 bash scripts/eval/eval_cls_local_verification.sh weights/matcher_vits_224.pth.tar dev/isc_copynce-cand_local-verification.yaml
 
-# To evaluate the matcher under ViT-S, 336 $\times$ 336 and LCE settings on dev set
+# evaluate the matcher under ViT-S, 336 $\times$ 336 and LCE settings on dev set
 bash scripts/eval/eval_cls_local_verification.sh /path/to/model/weights dev/isc_copynce-cand_local-verification_336.yaml
 ```
 
