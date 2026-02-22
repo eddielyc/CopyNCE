@@ -1,0 +1,57 @@
+input:
+  dataset:
+    - data_src: isc
+      root: "datasets/DISC21/training_images"
+      path_json: "data/DISC21_train.json"
+      positive_rate: 0.3
+      sampling_rate: 0.0833
+      return_mapping: true
+      return_mask: false
+      positive_ref_aug_p: 0.0
+      negative_ref_aug_p: 0.0
+
+      force_abandon_copynce: true
+      hard_negative_mining:
+        enable: true
+        p: 0.5
+        knn_r: 128
+        knns_path: "weights/dino_vits_isc_knn.pth"
+
+    - data_src: isc_val
+      root: "datasets/DISC21/training_images"
+      que_csv: "data/isc_25k_matching_val_set_query.csv"
+      ref_csv: "data/isc_matching_test_set_reference.csv"
+      label_json: "data/isc_25k_matching_val_set_gt.json"
+      positive_rate: 1.
+      sampling_rate: 1.
+      return_mapping: true
+      return_mask: false
+
+      force_abandon_copynce: true
+      hard_negative_mining:
+        enable: true
+        p: 1.0
+        knn_r: 128
+        knns_path: "weights/dino_vits_isc_val-to-ref_knn.pth"
+
+train:
+  collate_func: "default"
+  batch_size_per_gpu: 32
+
+optim:
+  epochs: 20
+  base_lr: 0.0002  # learning rate for a batch size of 1024
+
+model:
+  heads:
+    cls_head:
+      depth: 0
+
+    fusion_head: null
+
+loss:
+  segmentation_loss: null
+  classification_loss:
+    - type: bce_loss
+      weight: 1.
+  auxiliary_loss: null

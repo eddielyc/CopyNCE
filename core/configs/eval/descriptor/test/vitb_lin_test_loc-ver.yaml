@@ -1,0 +1,27 @@
+model:
+  embed_dim: 768
+  num_heads: 12
+
+
+eval:
+  que_csv_path: 'data/isc_matching_test_set_query.csv'
+
+  anno_file:
+    - 'data/isc_matching_test_set_gt.json'
+  
+  key: feat
+  metrics:
+    - type: "recall_at_topk"
+      k: null
+
+  batch_size_per_gpu: 16
+
+  local_verification:
+    - func: one_of_one
+      search_rank: 100
+    - func: one_of_two
+      search_rank: 10
+    - func: one_of_four
+      search_rank: 10
+    - func: one_of_nine
+      search_rank: 4

@@ -1,0 +1,188 @@
+arch: matching
+
+input:
+  img_size: 224
+  augmentation: &dflt_aug_cfg
+    type: lyakaap
+    interpolation: bicubic
+    aug_ops: # all augmentations will be cast on image.
+      shuffle: true
+      color_jitter:
+        p: 1.
+        brightness: 0.8
+        contrast: 0.8
+        saturation: 0.8
+        hue: 0.2
+      random_pixelization:
+        p: 0.25
+      shuffle_pixels:
+        factor: 0.1
+        p: 0.25
+      encoding_quality:
+        p: 0.35
+        qs: [ 10, 20, 30, 50 ]
+      random_grayscale:
+        p: 0.25
+      random_blur:
+        p: 0.25
+      random_overlay_text:
+        p: 0.35
+      random_overlay_emoji:
+        p: 0.35
+      random_edge_enhance:
+        p: 0.3
+      random_smearing:
+        p: 0.3
+        points: [ 5, 50 ]
+        width: [ 1, 5 ]
+        scale: [ 0.08, 0.8 ]
+        ratio: [ 0.5, 2.0 ]
+
+    geo_ops:
+      random_horizontal_flip:   # these two augmentations are always on
+        p: 0.5
+      random_vertical_flip:
+        p: 0.1
+
+      p: 0.35   # one of these augmentations will be cast on image
+      random_perspective:
+        p: 1.
+      random_affine:
+        p: 1.
+        degrees: [ 0, 360 ]
+        shear: 45
+        rotation_affinity: 22.5
+
+    crop_ops: # one of these augmentations will be cast on image
+      p: 0.5
+      random_resized_crop:
+        scale: [ 0.15, 0.5 ]
+        ratio: [ 0.33, 3.0 ]
+      overlay_image_onto_the_other:
+        scale: [ 0.15, 0.5 ]
+        ratio: [ 0.33, 3.0 ]
+        opacity: [ 0.5, 1.0 ] # foreground opacity, here is the image
+        p_scale: [ 0.2, 1.0 ]
+        p_ratio: [ 0.33, 3.0 ]
+      overlay_the_other_onto_image:
+        scale: [ 0.5, 0.8 ]
+        ratio: [ 0.33, 3.0 ]
+        opacity: [ 0.0, 0.5 ] # foreground opacity, here is the other image
+        p_scale: [ 0.3, 1.0 ]
+        p_ratio: [ 0.33, 3.0 ]
+
+    additional_ops:
+      p: 0.15
+
+    post_process:
+      random_padding:
+        p: 0.25
+        ratio: 0.2
+        fill: 0
+
+      random_erasing:
+        p: 0.25
+        value: random
+
+      normalize:
+        mean: [ 0.485, 0.456, 0.406 ]
+        std: [ 0.229, 0.224, 0.225 ]
+
+  dataset:
+    - data_src: isc
+      root: "datasets/DISC21/training_images"
+      path_json: "data/DISC21_train.json"
+      positive_rate: 0.3
+      sampling_rate: 1.
+      return_mapping: true
+      return_mask: false
+      positive_ref_aug_p: 0.0
+      negative_ref_aug_p: 0.0
+      hard_negative_mining:
+        enable: true
+        p: 0.5
+        knn_r: 128
+        knns_path: "weights/dino_vits_isc_knn.pth"
+
+train:
+  resume: true
+  pretrain: "weights/dino_vits16_enc-8_fus-4.pth"
+  batch_size_per_gpu: 32
+  output_dir: ""
+  save_freq: 5
+  log_freq: 50
+  eval_freq: 100
+  seed: 123
+  sampler: 'epoch'
+  collate_func: 'default'
+  num_workers: 10
+  fp16: false
+
+model:
+  encoder_depth: 8
+  fusion_depth: 4
+  freeze_patch: false
+  use_convstem: false
+  use_layer_scale: false
+  init_scale: 0
+
+  patch_size: &patch_size 16
+  embed_dim: 384
+  num_heads: 6
+  mlp_ratio: 4.
+  qkv_bias: true
+  qk_scale: null
+  drop_rate: 0.
+  attn_drop_rate: 0.
+  drop_path_rate: 0.
+
+  heads:
+    cls_head:
+      depth: 0
+
+    fusion_head:
+      depth: 0
+      input_mode: fusion
+      cls_token: false
+
+optim:
+  epochs: 30
+  weight_decay: 0.04
+  base_lr: 0.001  # learning rate for a batch size of 1024
+  lr: 0.  # will be set after applying scaling rule
+  warmup_epochs: 1
+  min_lr: 2.0e-06
+  clip_grad: 3.0
+  scaling_rule: sqrt_wrt_1024
+  betas: [ 0.9, 0.999 ]
+
+loss:
+  segmentation_loss: null
+  classification_loss:
+    - type: bce_loss
+      weight: 1.
+  auxiliary_loss:
+    - type: copynce
+      input_mode: fusion_head
+      patch_size: *patch_size
+      weight: 3.
+      scale: 16
+      lamb: 0.5
+      heads: "6:6"
+      gamma: 1.
+
+eval:
+  data_root: 'datasets/DISC21'
+  pair_json_path: 'data/isc_copynce_matching_dev_set_pairs.json'
+  ref_csv_path: 'data/isc_matching_test_set_reference.csv'
+  que_csv_path: 'data/isc_25k_matching_dev_set_query.csv'
+
+  anno_file:
+    - 'data/isc_25k_matching_dev_set_gt.json'
+
+  metrics:
+    - type: "map"
+    - type: "uap"
+    - type: "rp90"
+
+  batch_size_per_gpu: 128

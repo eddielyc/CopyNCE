@@ -1,0 +1,10 @@
+model:
+  heads:
+    linear_head:
+      fc_dim: 256
+
+eval:
+  que_csv_path: 'data/isc_matching_test_set_query.csv'
+
+  anno_file:
+    - 'data/isc_matching_test_set_gt.json'

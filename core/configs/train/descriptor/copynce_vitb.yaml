@@ -1,0 +1,27 @@
+train:
+  pretrain: "weights/dino_vitb16_enc-12.pth"
+
+model:
+  embed_dim: 768
+  num_heads: 12
+  patch_size: &patch_size 16
+
+loss:
+  auxiliary_loss:
+    - type: infonce
+      log_scale_init: 3.2
+      weight: 1.
+      gather: true
+    - type: copynce
+      input_mode: descriptor
+      patch_size: *patch_size
+      weight: 5.
+      lamb: 0.5
+      scale: 16
+      layer: 11
+      heads: "6:6"
+      gamma: 3.
+    - type: keleo_loss
+      weight: 5.
+      gather: true
+      key: feat

@@ -1,0 +1,5 @@
+input:
+  img_size: 336
+
+eval:
+  pair_json_path: 'data/isc_copynce_matching_dev_set_pairs.json'

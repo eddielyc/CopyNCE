@@ -1,0 +1,10 @@
+input:
+  img_size: 336
+
+eval:
+  batch_size_per_gpu: 16
+  pair_json_path: 'data/isc_copynce_matching_test_set_pairs.json'
+  que_csv_path: 'data/isc_matching_test_set_query.csv'
+
+  anno_file:
+    - 'data/isc_matching_test_set_gt.json'

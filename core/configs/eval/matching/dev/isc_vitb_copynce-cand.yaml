@@ -1,0 +1,6 @@
+model:
+  embed_dim: 768
+  num_heads: 12
+
+eval:
+  pair_json_path: 'data/isc_copynce_matching_dev_set_pairs.json'

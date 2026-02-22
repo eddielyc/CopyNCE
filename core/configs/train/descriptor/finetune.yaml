@@ -1,0 +1,39 @@
+input:
+  dataset:
+    - data_src: isc_val
+      root: "datasets/DISC21"
+      que_csv: "data/isc_25k_matching_val_set_query.csv"
+      ref_csv: "data/isc_matching_test_set_reference.csv"
+      label_json: "data/isc_25k_matching_val_set_gt.json"
+      positive_rate: 1.0
+      sampling_rate: 1.
+      return_mapping: false
+      return_mask: false
+
+      force_hard_negative_mining: false
+      force_abandon_copynce: true
+      hard_negative_mining:
+        enable: true
+        p: 1.0
+        knn_r: 8
+        knns_path: "weights/dino_vits_isc_val-to-ref_knn.pth"
+
+train:
+  collate_func: "default"
+
+optim:
+  base_lr: 0.0001  # learning rate for a batch size of 1024
+
+model:
+  patch_size: &patch_size 16
+
+loss:
+  auxiliary_loss:
+    - type: infonce
+      log_scale_init: 3.2
+      weight: 1.
+      gather: true
+    - type: keleo_loss
+      weight: 5.
+      gather: true
+      key: feat

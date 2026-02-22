@@ -1,0 +1,10 @@
+loss:
+  auxiliary_loss:
+    - type: infonce
+      log_scale_init: 3.2
+      weight: 1.
+      gather: true
+    - type: keleo_loss
+      weight: 5.
+      gather: true
+      key: feat
